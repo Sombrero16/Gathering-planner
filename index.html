@@ -319,7 +319,14 @@
         
         const optimalAmountFromCenter = Math.min(finalMarchLoad, totalSpeedAtCenter * timeAtCenterHours);
         const actualTimeToFillCenterHours = optimalAmountFromCenter / totalSpeedAtCenter;
-        let tempAmountToPrefill = finalMarchLoad - optimalAmountFromCenter;
+        
+        // Calculate the amount of load that needs to be pre-filled.
+        const loadToPrefill = finalMarchLoad - optimalAmountFromCenter;
+        
+        // Adjust the amount to gather by accounting for the bonus. 
+        // The bonus contributes to the load, so we need to gather less raw material.
+        let tempAmountToPrefill = loadToPrefill / (1 + selectedMarch.finalBonus);
+
 
         // 3. Generate Pre-fill Plan
         // Create a unified list of all nodes available for pre-filling
@@ -477,4 +484,3 @@
 
 </body>
 </html>
-
