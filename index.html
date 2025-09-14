@@ -22,6 +22,67 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
+        /* Tooltip styles */
+        .tooltip-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .question-mark {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background-color: #4a5568; /* bg-gray-600 */
+            color: white;
+            text-align: center;
+            font-size: 0.75rem;
+            line-height: 1rem;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: max-content; /* Let the bubble be as wide as its content... */
+            max-width: 300px;   /* ...but no wider than this, forcing text to wrap. */
+            background-color: #1a202c; /* bg-gray-900 */
+            color: #fff;
+            text-align: center;
+            border: 1px solid #4a5568; /* border-gray-600 */
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%; /* Position above the icon */
+            left: 50%;
+            transform: translateX(-50%); /* Center the tooltip */
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem; /* text-xs */
+            font-weight: 400; /* font-normal */
+            line-height: 1.25;
+            pointer-events: none; /* Make sure tooltip doesn't interfere with hover */
+        }
+
+        /* Arrow for the tooltip */
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1a202c transparent transparent transparent;
+        }
+
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white p-4 sm:p-6 lg:p-8">
@@ -29,14 +90,12 @@
     <div class="max-w-7xl mx-auto">
         <!-- The header now uses flexbox for better spacing and alignment -->
         <header class="text-center mb-8 flex items-center justify-center space-x-6">
-            <!-- Changed rounded-full to rounded-xl and added object-cover -->
             <img src="https://raw.githubusercontent.com/Sombrero16/Gathering-planner/main/assets/pictures/image02.jpg" alt="Decorative image" class="w-24 h-24 sm:w-32 sm:h-32 rounded-xl border-2 border-cyan-400 object-cover">
             <div>
                 <h1 class="text-3xl sm:text-4xl font-bold text-cyan-400">Resource Gathering Optimizer</h1>
                 <p class="text-xs sm:text-sm text-white-400 font-medium italic mt-2"><a href="./curra.html" class="text-white no-underline">C</a>ourtesy of S16</p>
                 <p class="text-gray-400 mt-2">Find the optimal gathering plan to maximize your final bonus.</p>
             </div>
-            <!-- Changed rounded-full to rounded-xl and added object-cover -->
             <img src="https://raw.githubusercontent.com/Sombrero16/Gathering-planner/main/assets/pictures/image01.jpg" alt="Decorative image" class="w-24 h-24 sm:w-32 sm:h-32 rounded-xl border-2 border-cyan-400 object-cover">
         </header>
 
@@ -56,19 +115,43 @@
                         <select id="select-center" class="form-select w-full border-gray-600 text-white rounded-md shadow-sm focus:border-cyan-500 focus:ring focus:ring-cyan-500 focus:ring-opacity-50"></select>
                     </div>
                     <div>
-                        <label for="select-global-speed" class="block text-sm font-medium text-gray-300 mb-1">Global Speed Buff</label>
+                        <label for="select-global-speed" class="block text-sm font-medium text-gray-300 mb-1">
+                            <span>Global Speed Buff</span>
+                             <span class="tooltip-container">
+                                <span class="question-mark">?</span>
+                                <span class="tooltip-text">Kingdom Buffs activated by the King</span>
+                            </span>
+                        </label>
                         <select id="select-global-speed" class="form-select w-full border-gray-600 text-white rounded-md shadow-sm focus:border-cyan-500 focus:ring focus:ring-cyan-500 focus:ring-opacity-50"></select>
                     </div>
                     <div>
-                        <label for="select-load-bonus" class="block text-sm font-medium text-gray-300 mb-1">Load Bonus</label>
+                        <label for="select-load-bonus" class="block text-sm font-medium text-gray-300 mb-1">
+                            <span>Load Bonus</span>
+                            <span class="tooltip-container">
+                                <span class="question-mark">?</span>
+                                <span class="tooltip-text">Unit Capacity Booster</span>
+                            </span>
+                        </label>
                         <select id="select-load-bonus" class="form-select w-full border-gray-600 text-white rounded-md shadow-sm focus:border-cyan-500 focus:ring focus:ring-cyan-500 focus:ring-opacity-50"></select>
                     </div>
                     <div>
-                        <label for="time-at-center" class="block text-sm font-medium text-gray-300 mb-1">Time at Resource Center (HH:MM)</label>
+                        <label for="time-at-center" class="block text-sm font-medium text-gray-300 mb-1">
+                            <span>Time at Resource Center (HH:MM)</span>
+                            <span class="tooltip-container">
+                                <span class="question-mark">?</span>
+                                <span class="tooltip-text">Time left at the Alliance Resource Center</span>
+                            </span>
+                        </label>
                         <input type="text" id="time-at-center" value="22:30" class="form-input w-full border-gray-600 text-white rounded-md shadow-sm focus:border-cyan-500 focus:ring focus:ring-cyan-500 focus:ring-opacity-50">
                     </div>
                     <div>
-                        <label for="select-civilization" class="block text-sm font-medium text-gray-300 mb-1">Civilization</label>
+                        <label for="select-civilization" class="block text-sm font-medium text-gray-300 mb-1">
+                            <span>Civilization</span>
+                             <span class="tooltip-container">
+                                <span class="question-mark">?</span>
+                                <span class="tooltip-text">Some Civilizations provide certain additional gathering skills</span>
+                            </span>
+                        </label>
                         <select id="select-civilization" class="form-select w-full border-gray-600 text-white rounded-md shadow-sm focus:border-cyan-500 focus:ring focus:ring-cyan-500 focus:ring-opacity-50">
                             <option value="other">Other</option>
                             <option value="byzantines">Byzantines</option>
@@ -93,9 +176,21 @@
 
                 <h2 class="text-xl font-semibold mt-8 mb-4 border-b border-gray-700 pb-3">Edit Your Stats</h2>
                 <div class="space-y-4">
-                    <h3 class="text-lg font-medium text-gray-200">Marches</h3>
+                    <h3 class="text-lg font-medium text-gray-200">
+                        <span>Marches</span>
+                        <span class="tooltip-container">
+                            <span class="question-mark">?</span>
+                            <span class="tooltip-text" style="text-align: left; bottom: 125%;">&bull; Speed: Shown as Gathering Bonus % on your march Overview<br>&bull; Bonus: The combined percentage of "Increased resource gained" from the Talent Tree and Hero Skills<br>&bull; Load: Shown as Load on your march Overview</span>
+                        </span>
+                    </h3>
                     <div id="march-editor" class="space-y-3"></div>
-                    <h3 class="text-lg font-medium text-gray-200 mt-4">Resource Speeds</h3>
+                    <h3 class="text-lg font-medium text-gray-200 mt-4">
+                         <span>Resource Speeds</span>
+                        <span class="tooltip-container">
+                            <span class="question-mark">?</span>
+                            <span class="tooltip-text">Certain resource gathering speed</span>
+                        </span>
+                    </h3>
                     <div id="resource-editor" class="space-y-3"></div>
                 </div>
             </div>
@@ -215,7 +310,13 @@
                 </label>
             `;
             nodeDiv.innerHTML = `
-                <span class="font-medium">${t6RichNode.name}</span>
+                <div>
+                    <span class="font-medium">${t6RichNode.name}</span>
+                    <span class="tooltip-container">
+                        <span class="question-mark">?</span>
+                        <span class="tooltip-text">Rich Resources Event available</span>
+                    </span>
+                </div>
                 <div class="flex items-center space-x-4 h-6">${t6ToggleHTML}</div>
             `;
             UIElements.nodesTable.appendChild(nodeDiv);
@@ -237,7 +338,13 @@
             </label>
         `;
         centerDiv.innerHTML = `
-            <span class="font-medium">Resource Center</span>
+            <div>
+                <span class="font-medium">Resource Center</span>
+                <span class="tooltip-container">
+                    <span class="question-mark">?</span>
+                    <span class="tooltip-text" style="text-align: left; bottom: 125%;">Do you have enough time, to pre-fill with the Resource Center or do you only have time to put every march in once and fill the rest with standard nodes</span>
+                </span>
+            </div>
             <div class="flex items-center space-x-4 h-6">${centerToggleHTML}</div>
         `;
         UIElements.nodesTable.appendChild(centerDiv);
