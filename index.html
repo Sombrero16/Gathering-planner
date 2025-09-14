@@ -29,13 +29,15 @@
     <div class="max-w-7xl mx-auto">
         <!-- The header now uses flexbox for better spacing and alignment -->
         <header class="text-center mb-8 flex items-center justify-center space-x-6">
-            <img src="https://raw.githubusercontent.com/Sombrero16/Gathering-planner/main/assets/pictures/image02.jpg" alt="Decorative image" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-2 border-cyan-400">
+            <!-- Changed rounded-full to rounded-xl and added object-cover -->
+            <img src="https://raw.githubusercontent.com/Sombrero16/Gathering-planner/main/assets/pictures/image02.jpg" alt="Decorative image" class="w-24 h-24 sm:w-32 sm:h-32 rounded-xl border-2 border-cyan-400 object-cover">
             <div>
                 <h1 class="text-3xl sm:text-4xl font-bold text-cyan-400">Resource Gathering Optimizer</h1>
                 <p class="text-xs sm:text-sm text-white-400 font-medium italic mt-2"><a href="./curra.html" class="text-white no-underline">C</a>ourtesy of S16</p>
                 <p class="text-gray-400 mt-2">Find the optimal gathering plan to maximize your final bonus.</p>
             </div>
-            <img src="https://raw.githubusercontent.com/Sombrero16/Gathering-planner/main/assets/pictures/image01.jpg" alt="Decorative image" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-2 border-cyan-400">
+            <!-- Changed rounded-full to rounded-xl and added object-cover -->
+            <img src="https://raw.githubusercontent.com/Sombrero16/Gathering-planner/main/assets/pictures/image01.jpg" alt="Decorative image" class="w-24 h-24 sm:w-32 sm:h-32 rounded-xl border-2 border-cyan-400 object-cover">
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -514,6 +516,7 @@
                         <span class="font-medium text-cyan-400">+ ${formatNumber(results.bonusResources)}</span>
                     </div>
                 </div>
+                <img src="https://raw.githubusercontent.com/Sombrero16/Gathering-planner/main/assets/pictures/image03.jpg" alt="Summary Banner" class="w-full h-auto mt-6 rounded-lg object-cover">
             </div>
         `;
         
@@ -528,3 +531,4 @@
 
 </body>
 </html>
+
