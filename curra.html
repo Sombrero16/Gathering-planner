@@ -238,6 +238,7 @@
             { id: 'rc_gold', name: 'Resource Center (Gold)', baseSpeed: 250000, capacity: 800000000, repeatable: false, available: true },
         ],
         nodes: [
+            { name: 'T7', baseSpeed: 210000, capacity: 5292000, available: true, repeatable: false },
             { name: 'T6 Rich', baseSpeed: 420000, capacity: 12600000, available: true, repeatable: false },
             { name: 'T6', baseSpeed: 210000, capacity: 3780000, available: true, repeatable: true },
             { name: 'T5', baseSpeed: 200000, capacity: 2160000, available: true, repeatable: true },
@@ -295,41 +296,49 @@
 
     function populateNodes() {
         UIElements.nodesTable.innerHTML = '';
-        
-        // T6 Rich Toggle
-        const t6RichNode = config.nodes.find(n => n.name === 'T6 Rich');
-        const t6RichIndex = config.nodes.findIndex(n => n.name === 'T6 Rich');
-        if (t6RichNode) {
+
+        // Find all non-repeatable nodes and create toggles for them
+        const specialNodes = config.nodes.filter(n => !n.repeatable);
+
+        specialNodes.forEach(node => {
+            const nodeIndex = config.nodes.findIndex(n => n.name === node.name);
+            if (nodeIndex === -1) return; // Should not happen
+
             const nodeDiv = document.createElement('div');
             nodeDiv.className = 'flex items-center justify-between bg-gray-700 p-2 rounded-md';
-            const t6ToggleHTML = `
+            
+            const toggleHTML = `
                 <label class="flex items-center space-x-2 text-xs cursor-pointer">
-                    <input type="checkbox" data-index="${t6RichIndex}" data-type="available" class="form-checkbox h-4 w-4 bg-gray-800 border-gray-600 rounded text-cyan-500 focus:ring-cyan-600" ${t6RichNode.available ? 'checked' : ''}>
+                    <input type="checkbox" data-index="${nodeIndex}" class="form-checkbox h-4 w-4 bg-gray-800 border-gray-600 rounded text-cyan-500 focus:ring-cyan-600" ${node.available ? 'checked' : ''}>
                     <span>Available</span>
                 </label>
             `;
+
+            const tooltipText = node.name.includes('Rich') ? 'Rich Resources Event available' : `Is the ${node.name} node available?`;
+
             nodeDiv.innerHTML = `
                 <div>
-                    <span class="font-medium">${t6RichNode.name}</span>
+                    <span class="font-medium">${node.name}</span>
                     <span class="tooltip-container">
                         <span class="question-mark">?</span>
-                        <span class="tooltip-text">Rich Resources Event available</span>
+                        <span class="tooltip-text">${tooltipText}</span>
                     </span>
                 </div>
-                <div class="flex items-center space-x-4 h-6">${t6ToggleHTML}</div>
+                <div class="flex items-center space-x-4 h-6">${toggleHTML}</div>
             `;
-            UIElements.nodesTable.appendChild(nodeDiv);
             
+            UIElements.nodesTable.appendChild(nodeDiv);
+
             nodeDiv.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
-                config.nodes[t6RichIndex].available = e.target.checked;
+                config.nodes[nodeIndex].available = e.target.checked;
                 calculatePlan();
             });
-        }
-        
+        });
+
         // Resource Center Toggle
         const centerDiv = document.createElement('div');
         centerDiv.className = 'flex items-center justify-between bg-gray-700 p-2 rounded-md';
-        const centerIsRepeatable = config.centerNodes[0]?.repeatable || false; // State is shared across all center types
+        const centerIsRepeatable = config.centerNodes[0]?.repeatable || false;
         const centerToggleHTML = `
             <label class="flex items-center space-x-2 text-xs cursor-pointer">
                 <input type="checkbox" id="center-repeatable-toggle" class="form-checkbox h-4 w-4 bg-gray-800 border-gray-600 rounded text-cyan-500 focus:ring-cyan-600" ${centerIsRepeatable ? 'checked' : ''}>
@@ -637,4 +646,3 @@
 
 </body>
 </html>
-
