@@ -83,6 +83,17 @@
             visibility: visible;
             opacity: 1;
         }
+        
+        /* Guide styles */
+        .guide-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+
+        .guide-arrow {
+            transition: transform 0.3s ease-out;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white p-4 sm:p-6 lg:p-8">
@@ -99,6 +110,38 @@
             <img src="https://raw.githubusercontent.com/Sombrero16/Gathering-planner/main/assets/pictures/image01.jpg" alt="Decorative image" class="w-24 h-24 sm:w-32 sm:h-32 rounded-xl border-2 border-cyan-400 object-cover">
         </header>
 
+        <!-- Quick Guide Section -->
+        <div class="bg-gray-800 rounded-xl shadow-lg mb-6">
+            <button id="guide-toggle" class="w-full flex justify-between items-center p-4 text-left font-semibold text-cyan-400 focus:outline-none">
+                <span>Quick Guide: Maximize Your Gathering Bonus</span>
+                <svg id="guide-arrow" class="guide-arrow w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div id="guide-content" class="guide-content px-4">
+                <div class="pb-4 text-gray-300 text-sm space-y-4">
+                    <p>This tool calculates the optimal two-step plan to maximize the "Increased resource gained" bonus on your march (pre-fill & final gather).</p>
+                    <div>
+                        <h4 class="font-semibold text-white mb-2">The Core Strategy</h4>
+                        <p>The goal is to ensure your march's Load Capacity is exactly full enough before it enters the long-duration Final Gather node (e.g., the Alliance Center), massively increasing your final haul.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-white mb-2">Step-by-Step Plan</h4>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li><strong class="text-gray-200">Input Stats (Edit Your Stats):</strong> Enter your march's Load, Speed %, and Bonus %. Also, input your individual Resource Speeds—the tool uses your highest speed resource for the Pre-fill plan.</li>
+                            <li><strong class="text-gray-200">Set Buffs (Calculator Settings):</strong> Select your Global Speed, Load Bonus, and crucially, the Time remaining on the Alliance Center.</li>
+                            <li><strong class="text-gray-200">Toggle Nodes (Node Status):</strong> Check the boxes for any special, high-capacity nodes (T7, T6 Rich) available on your map to include in the calculation.</li>
+                        </ol>
+                    </div>
+                     <div>
+                        <h4 class="font-semibold text-white mb-2">Follow the Plan (Your Optimal Plan)</h4>
+                         <ol class="list-decimal list-inside space-y-2">
+                             <li><strong class="text-gray-200">Pre-fill Steps:</strong> Gather the exact (~) amount specified from the suggested nodes (Step 1, 2, 3...) to fill your march's pre-fill capacity. This way you will have exactly enough capacity available, to fill the entire last node / remaining resource center.</li>
+                              <li><strong class="text-gray-200">Final Gather:</strong> Send the march to the Resource Center or biggest available node for the remaining time, to gain maximum bonus resources.</li>
+                         </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             <!-- Left Panel: Settings -->
@@ -113,6 +156,10 @@
                     <div>
                         <label for="select-center" class="block text-sm font-medium text-gray-300 mb-1">Select Resource Center</label>
                         <select id="select-center" class="form-select w-full border-gray-600 text-white rounded-md shadow-sm focus:border-cyan-500 focus:ring focus:ring-cyan-500 focus:ring-opacity-50"></select>
+                    </div>
+                     <div>
+                        <label for="select-rich-resource" class="block text-sm font-medium text-gray-300 mb-1">Select Rich Resource</label>
+                        <select id="select-rich-resource" class="form-select w-full border-gray-600 text-white rounded-md shadow-sm focus:border-cyan-500 focus:ring focus:ring-cyan-500 focus:ring-opacity-50"></select>
                     </div>
                     <div>
                         <label for="select-global-speed" class="block text-sm font-medium text-gray-300 mb-1">
@@ -142,7 +189,7 @@
                                 <span class="tooltip-text">Time left at the Alliance Resource Center</span>
                             </span>
                         </label>
-                        <input type="text" id="time-at-center" value="22:30" class="form-input w-full border-gray-600 text-white rounded-md shadow-sm focus:border-cyan-500 focus:ring focus:ring-cyan-500 focus:ring-opacity-50">
+                        <input type="text" id="time-at-center" value="12:30" class="form-input w-full border-gray-600 text-white rounded-md shadow-sm focus:border-cyan-500 focus:ring focus:ring-cyan-500 focus:ring-opacity-50">
                     </div>
                     <div>
                         <label for="select-civilization" class="block text-sm font-medium text-gray-300 mb-1">
@@ -239,7 +286,7 @@
             { id: 'rc_gold', name: 'Resource Center (Gold)', baseSpeed: 250000, capacity: 800000000, repeatable: false, available: true },
         ],
         nodes: [
-            { name: 'T7', baseSpeed: 210000, capacity: 5292000, available: true, repeatable: false },
+            { name: 'T7', baseSpeed: 210000, capacity: 5292000, available: true, repeatable: true },
             { name: 'T6 Rich', baseSpeed: 420000, capacity: 12600000, available: true, repeatable: false },
             { name: 'T6', baseSpeed: 210000, capacity: 3780000, available: true, repeatable: true },
             { name: 'T5', baseSpeed: 200000, capacity: 2160000, available: true, repeatable: true },
@@ -251,6 +298,7 @@
     const UIElements = {
         marchSelect: document.getElementById('select-march'),
         centerSelect: document.getElementById('select-center'),
+        richResourceSelect: document.getElementById('select-rich-resource'),
         globalSpeedSelect: document.getElementById('select-global-speed'),
         loadBonusSelect: document.getElementById('select-load-bonus'),
         timeAtCenterInput: document.getElementById('time-at-center'),
@@ -261,382 +309,348 @@
         imperialTitle: document.getElementById('imperial-title'),
         civilizationSelect: document.getElementById('select-civilization'),
         egyptianNotice: document.getElementById('egyptian-notice'),
-        byzantinesNotice: document.getElementById('byzantines-notice')
+        byzantinesNotice: document.getElementById('byzantines-notice'),
+        guideToggle: document.getElementById('guide-toggle'),
+        guideContent: document.getElementById('guide-content'),
+        guideArrow: document.getElementById('guide-arrow'),
+    };
+
+    // --- HELPER FUNCTIONS ---
+    const formatNumber = (num) => Math.round(num).toLocaleString();
+    const formatTime = (hours) => {
+        if (!isFinite(hours)) return '00:00:00';
+        const totalSeconds = hours * 3600;
+        const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+        const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+        const s = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+        return `${h}:${m}:${s}`;
     };
 
     // --- INITIALIZATION ---
     function init() {
         populateSelect(UIElements.marchSelect, config.marches, 'name', 'id');
         populateSelect(UIElements.centerSelect, config.centerNodes, 'name', 'id');
+        UIElements.centerSelect.value = 'rc_food'; // Set default
+        populateSelect(UIElements.richResourceSelect, config.resources, 'name', 'name');
         populateSelect(UIElements.globalSpeedSelect, config.globalSpeeds, 'name', 'speedBonus');
         populateSelect(UIElements.loadBonusSelect, config.loadBonuses, 'name', 'bonus');
         populateNodes();
         populateEditors();
-        
-        // Add event listeners
-        Object.values(UIElements).forEach(el => {
-            if (el && (el.tagName === 'SELECT' || el.tagName === 'INPUT')) {
-                el.addEventListener('change', calculatePlan);
-            }
-        });
-        UIElements.timeAtCenterInput.addEventListener('keyup', calculatePlan);
-
-        // Initial calculation
+        addEventListeners();
         calculatePlan();
     }
 
-    function populateSelect(selectElement, items, nameKey, valueKey) {
-        selectElement.innerHTML = '';
-        items.forEach(item => {
-            const option = document.createElement('option');
-            option.textContent = item[nameKey];
-            option.value = item[valueKey];
-            selectElement.appendChild(option);
+    function addEventListeners() {
+        // Recalculate on any input change
+        document.querySelectorAll('select, input').forEach(el => {
+            el.addEventListener('change', calculatePlan);
         });
+        UIElements.timeAtCenterInput.addEventListener('keyup', calculatePlan);
+
+        // Guide toggle
+        UIElements.guideToggle.addEventListener('click', () => {
+            const isExpanded = UIElements.guideContent.style.maxHeight;
+            if (isExpanded && isExpanded !== '0px') {
+                UIElements.guideContent.style.maxHeight = '0px';
+                UIElements.guideArrow.style.transform = 'rotate(0deg)';
+            } else {
+                UIElements.guideContent.style.maxHeight = UIElements.guideContent.scrollHeight + 'px';
+                UIElements.guideArrow.style.transform = 'rotate(180deg)';
+            }
+        });
+
+        // Event listeners for dynamically created editor inputs
+        UIElements.marchEditor.addEventListener('change', (e) => {
+            if (e.target.tagName === 'INPUT') {
+                const index = e.target.dataset.index;
+                const prop = e.target.dataset.prop;
+                let value = parseFloat(e.target.value);
+                config.marches[index][prop] = (prop !== 'baseLoad') ? value / 100 : value;
+                calculatePlan();
+            }
+        });
+
+        UIElements.resourceEditor.addEventListener('change', (e) => {
+            if (e.target.tagName === 'INPUT') {
+                const index = e.target.dataset.index;
+                const value = parseFloat(e.target.value) / 100;
+                config.resources[index].speedBonus = value;
+                calculatePlan();
+            }
+        });
+    }
+
+    // --- UI POPULATION ---
+    function populateSelect(selectElement, items, nameKey, valueKey) {
+        selectElement.innerHTML = items.map(item => `<option value="${item[valueKey]}">${item[nameKey]}</option>`).join('');
     }
 
     function populateNodes() {
         UIElements.nodesTable.innerHTML = '';
+        const specialNodeNames = ['T7', 'T6 Rich'];
 
-        // Find all non-repeatable nodes and create toggles for them
-        const specialNodes = config.nodes.filter(n => !n.repeatable);
-
-        specialNodes.forEach(node => {
-            const nodeIndex = config.nodes.findIndex(n => n.name === node.name);
-            if (nodeIndex === -1) return; // Should not happen
-
+        specialNodeNames.forEach(nodeName => {
+            const node = config.nodes.find(n => n.name === nodeName);
+            if (!node) return;
+            const nodeIndex = config.nodes.findIndex(n => n.name === nodeName);
             const nodeDiv = document.createElement('div');
             nodeDiv.className = 'flex items-center justify-between bg-gray-700 p-2 rounded-md';
             
-            const toggleHTML = `
-                <label class="flex items-center space-x-2 text-xs cursor-pointer">
-                    <input type="checkbox" data-index="${nodeIndex}" class="form-checkbox h-4 w-4 bg-gray-800 border-gray-600 rounded text-cyan-500 focus:ring-cyan-600" ${node.available ? 'checked' : ''}>
-                    <span>Available</span>
-                </label>
-            `;
-
-            const tooltipText = node.name.includes('Rich') ? 'Rich Resources Event available' : `Is the ${node.name} node available?`;
-
-            nodeDiv.innerHTML = `
-                <div>
-                    <span class="font-medium">${node.name}</span>
-                    <span class="tooltip-container">
-                        <span class="question-mark">?</span>
-                        <span class="tooltip-text">${tooltipText}</span>
-                    </span>
-                </div>
-                <div class="flex items-center space-x-4 h-6">${toggleHTML}</div>
-            `;
+            let togglesHTML = `<label class="flex items-center justify-end space-x-2 text-xs cursor-pointer">
+                <input type="checkbox" data-index="${nodeIndex}" data-prop="available" class="form-checkbox h-4 w-4 bg-gray-800 border-gray-600 rounded text-cyan-500 focus:ring-cyan-600" ${node.available ? 'checked' : ''}>
+                <span>Available</span></label>`;
             
+            if (nodeName !== 'T7') {
+                togglesHTML += `<label class="flex items-center justify-end space-x-2 text-xs cursor-pointer mt-2">
+                    <input type="checkbox" data-index="${nodeIndex}" data-prop="repeatable" class="form-checkbox h-4 w-4 bg-gray-800 border-gray-600 rounded text-cyan-500 focus:ring-cyan-600" ${node.repeatable ? 'checked' : ''}>
+                    <span>Repeatable</span></label>`;
+            }
+            
+            nodeDiv.innerHTML = `<div><span class="font-medium">${node.name}</span></div><div class="text-right">${togglesHTML}</div>`;
             UIElements.nodesTable.appendChild(nodeDiv);
-
-            nodeDiv.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
-                config.nodes[nodeIndex].available = e.target.checked;
-                calculatePlan();
-            });
         });
 
-        // Resource Center Toggle
+        UIElements.nodesTable.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox' && e.target.dataset.index) {
+                const { index, prop } = e.target.dataset;
+                config.nodes[index][prop] = e.target.checked;
+                calculatePlan();
+            }
+        });
+
+        // Resource Center Toggles
         const centerDiv = document.createElement('div');
         centerDiv.className = 'flex items-center justify-between bg-gray-700 p-2 rounded-md';
-        const centerIsRepeatable = config.centerNodes[0]?.repeatable || false;
-        const centerToggleHTML = `
-            <label class="flex items-center space-x-2 text-xs cursor-pointer">
-                <input type="checkbox" id="center-repeatable-toggle" class="form-checkbox h-4 w-4 bg-gray-800 border-gray-600 rounded text-cyan-500 focus:ring-cyan-600" ${centerIsRepeatable ? 'checked' : ''}>
-                <span>Repeatable</span>
-            </label>
-        `;
+        const centerIsAvailable = config.centerNodes[0]?.available;
+        const centerIsRepeatable = config.centerNodes[0]?.repeatable;
         centerDiv.innerHTML = `
-            <div>
-                <span class="font-medium">Resource Center</span>
-                <span class="tooltip-container">
-                    <span class="question-mark">?</span>
-                    <span class="tooltip-text" style="text-align: left; bottom: 125%;">Do you have enough time, to pre-fill with the Resource Center or do you only have time to put every march in once and fill the rest with standard nodes</span>
-                </span>
-            </div>
-            <div class="flex items-center space-x-4 h-6">${centerToggleHTML}</div>
-        `;
+            <div><span class="font-medium">Resource Center</span></div>
+            <div class="text-right">
+                <label class="flex items-center justify-end space-x-2 text-xs cursor-pointer">
+                    <input type="checkbox" id="center-available-toggle" class="form-checkbox h-4 w-4 bg-gray-800 border-gray-600 rounded text-cyan-500 focus:ring-cyan-600" ${centerIsAvailable ? 'checked' : ''}>
+                    <span>Available</span>
+                    <span class="tooltip-container"><span class="question-mark">?</span><span class="tooltip-text">Might not be available...</span></span>
+                </label>
+                <label class="flex items-center justify-end space-x-2 text-xs cursor-pointer mt-2">
+                    <input type="checkbox" id="center-repeatable-toggle" class="form-checkbox h-4 w-4 bg-gray-800 border-gray-600 rounded text-cyan-500 focus:ring-cyan-600" ${centerIsRepeatable ? 'checked' : ''}>
+                    <span>Repeatable</span>
+                    <span class="tooltip-container"><span class="question-mark">?</span><span class="tooltip-text" style="text-align: left; bottom: 125%;">Do you have enough time...</span></span>
+                </label>
+            </div>`;
         UIElements.nodesTable.appendChild(centerDiv);
 
+        document.getElementById('center-available-toggle').addEventListener('change', (e) => {
+            config.centerNodes.forEach(node => node.available = e.target.checked);
+            calculatePlan();
+        });
         document.getElementById('center-repeatable-toggle').addEventListener('change', (e) => {
-            const isChecked = e.target.checked;
-            config.centerNodes.forEach(node => node.repeatable = isChecked);
+            config.centerNodes.forEach(node => node.repeatable = e.target.checked);
             calculatePlan();
         });
     }
 
     function populateEditors() {
-        // March Editor
-        UIElements.marchEditor.innerHTML = '';
-        config.marches.forEach((march, index) => {
-            const marchDiv = document.createElement('div');
-            marchDiv.className = 'p-3 bg-gray-700 rounded-md';
-            marchDiv.innerHTML = `
+        UIElements.marchEditor.innerHTML = config.marches.map((march, index) => `
+            <div class="p-3 bg-gray-700 rounded-md">
                 <p class="font-bold text-white mb-2">${march.name}</p>
                 <div class="grid grid-cols-3 gap-2 text-xs">
-                    <div>
-                        <label class="block text-gray-400">Speed %</label>
-                        <input type="number" value="${march.speedBonus * 100}" data-index="${index}" data-prop="speedBonus" class="form-input w-full p-1 rounded-sm">
-                    </div>
-                    <div>
-                        <label class="block text-gray-400">Bonus %</label>
-                        <input type="number" value="${march.finalBonus * 100}" data-index="${index}" data-prop="finalBonus" class="form-input w-full p-1 rounded-sm">
-                    </div>
-                    <div>
-                        <label class="block text-gray-400">Load</label>
-                        <input type="number" value="${march.baseLoad}" data-index="${index}" data-prop="baseLoad" class="form-input w-full p-1 rounded-sm">
-                    </div>
+                    <div><label class="block text-gray-400">Speed %</label><input type="number" value="${march.speedBonus * 100}" data-index="${index}" data-prop="speedBonus" class="form-input w-full p-1 rounded-sm"></div>
+                    <div><label class="block text-gray-400">Bonus %</label><input type="number" value="${march.finalBonus * 100}" data-index="${index}" data-prop="finalBonus" class="form-input w-full p-1 rounded-sm"></div>
+                    <div><label class="block text-gray-400">Load</label><input type="number" value="${march.baseLoad}" data-index="${index}" data-prop="baseLoad" class="form-input w-full p-1 rounded-sm"></div>
                 </div>
-            `;
-            UIElements.marchEditor.appendChild(marchDiv);
-        });
+            </div>`).join('');
 
-        // Resource Editor
-        UIElements.resourceEditor.innerHTML = '';
-        config.resources.forEach((resource, index) => {
-            const resourceDiv = document.createElement('div');
-            resourceDiv.className = 'flex items-center justify-between bg-gray-700 p-2 rounded-md';
-            resourceDiv.innerHTML = `
+        UIElements.resourceEditor.innerHTML = config.resources.map((resource, index) => `
+            <div class="flex items-center justify-between bg-gray-700 p-2 rounded-md">
                 <label class="text-gray-300 font-medium">${resource.name}</label>
                 <div class="flex items-center space-x-2">
                     <input type="number" value="${resource.speedBonus * 100}" data-index="${index}" data-prop="speedBonus" class="form-input w-24 p-1 rounded-sm text-center">
                     <span class="text-gray-400">%</span>
                 </div>
-            `;
-            UIElements.resourceEditor.appendChild(resourceDiv);
-        });
-
-        // Add event listeners for new inputs
-        UIElements.marchEditor.querySelectorAll('input').forEach(input => {
-            input.addEventListener('change', (e) => {
-                const index = e.target.dataset.index;
-                const prop = e.target.dataset.prop;
-                let value = parseFloat(e.target.value);
-                if (prop !== 'baseLoad') {
-                    value /= 100; // Convert from percentage
-                }
-                config.marches[index][prop] = value;
-                calculatePlan();
-            });
-        });
-
-        UIElements.resourceEditor.querySelectorAll('input').forEach(input => {
-            input.addEventListener('change', (e) => {
-                const index = e.target.dataset.index;
-                const prop = e.target.dataset.prop;
-                const value = parseFloat(e.target.value) / 100;
-                config.resources[index][prop] = value;
-                calculatePlan();
-            });
-        });
+            </div>`).join('');
     }
 
     // --- CALCULATION LOGIC ---
-    function calculatePlan() {
-        // Handle UI toggles
-        if (UIElements.civilizationSelect.value === 'egyptian') {
-            UIElements.egyptianNotice.classList.remove('hidden');
-            UIElements.byzantinesNotice.classList.add('hidden');
-        } else if (UIElements.civilizationSelect.value === 'byzantines') {
-            UIElements.byzantinesNotice.classList.remove('hidden');
-            UIElements.egyptianNotice.classList.add('hidden');
-        } else {
-            UIElements.byzantinesNotice.classList.add('hidden');
-            UIElements.egyptianNotice.classList.add('hidden');
-        }
-
-        // 1. Get current values
+    function getAppSettings() {
         const selectedMarch = config.marches.find(m => m.id == UIElements.marchSelect.value);
-        if (!selectedMarch) return;
-        
         const selectedCenterId = UIElements.centerSelect.value;
-        const centerNode = config.centerNodes.find(n => n.id === selectedCenterId);
-        if (!centerNode) return;
-
-        // Create a temporary copy of resources to apply civilization bonus
+        const centerNodeData = config.centerNodes.find(n => n.id === selectedCenterId);
+        
         let currentResources = JSON.parse(JSON.stringify(config.resources));
         if (UIElements.civilizationSelect.value === 'byzantines') {
             const stone = currentResources.find(r => r.name === 'Stone');
-            if (stone) {
-                stone.speedBonus += 0.05;
-            }
+            if (stone) stone.speedBonus += 0.05;
         }
 
-        // Determine optimal resource for PREFILL nodes using the potentially modified resource list
-        const optimalResource = currentResources.reduce((max, res) => res.speedBonus > max.speedBonus ? res : max, currentResources[0]);
-        const optimalResourceName = optimalResource.name;
-        
-        // Determine the SPECIFIC resource bonus for the SELECTED CENTER
-        const centerResourceName = selectedCenterId.split('_')[1]; // 'wood' from 'rc_wood'
-        const centerResource = currentResources.find(r => r.name.toLowerCase() === centerResourceName) || currentResources[0];
-        
-        const globalSpeedBonus = parseFloat(UIElements.globalSpeedSelect.value);
-        const imperialTitleBonus = UIElements.imperialTitle.checked ? 0.10 : 0;
-        const loadBonus = parseFloat(UIElements.loadBonusSelect.value);
         const timeParts = UIElements.timeAtCenterInput.value.split(':').map(Number);
         const timeAtCenterHours = (timeParts[0] || 0) + ((timeParts[1] || 0) / 60);
 
-        // 2. Core Calculations
-        const finalMarchLoad = selectedMarch.baseLoad * (1 + loadBonus);
-        
-        const totalCenterSpeedBonus = selectedMarch.speedBonus + centerResource.speedBonus + globalSpeedBonus + imperialTitleBonus;
-        const totalSpeedAtCenter = centerNode.baseSpeed * (1 + totalCenterSpeedBonus);
-        
-        const optimalAmountFromCenter = Math.min(finalMarchLoad, totalSpeedAtCenter * timeAtCenterHours);
-        const actualTimeToFillCenterHours = optimalAmountFromCenter > 0 ? optimalAmountFromCenter / totalSpeedAtCenter : 0;
-        
-        const loadToPrefill = finalMarchLoad - optimalAmountFromCenter;
-        let tempAmountToPrefill = loadToPrefill > 0 ? loadToPrefill / (1 + selectedMarch.finalBonus) : 0;
+        const loadBonus = parseFloat(UIElements.loadBonusSelect.value);
+        const egyptianLoadBonus = UIElements.civilizationSelect.value === 'egyptian' ? 0.05 : 0;
+        const finalMarchLoad = selectedMarch.baseLoad * (1 + loadBonus + egyptianLoadBonus);
 
+        return {
+            selectedMarch,
+            centerNodeData,
+            currentResources,
+            timeAtCenterHours,
+            finalMarchLoad,
+            globalSpeedBonus: parseFloat(UIElements.globalSpeedSelect.value),
+            imperialTitleBonus: UIElements.imperialTitle.checked ? 0.10 : 0,
+            optimalResource: currentResources.reduce((max, res) => res.speedBonus > max.speedBonus ? res : max, currentResources[0]),
+            centerResource: currentResources.find(r => r.name.toLowerCase() === selectedCenterId.split('_')[1]) || currentResources[0],
+            richResource: currentResources.find(r => r.name === UIElements.richResourceSelect.value) || currentResources.reduce((max, res) => res.speedBonus > max.speedBonus ? res : max, currentResources[0]),
+        };
+    }
+    
+    function calculateEffectiveSpeed(node, settings) {
+        const { selectedMarch, centerResource, richResource, optimalResource, globalSpeedBonus, imperialTitleBonus } = settings;
+        const isCenter = 'isCenter' in node;
+        const nodeResource = isCenter ? centerResource : (node.name === 'T6 Rich' ? richResource : optimalResource);
+        const totalSpeedBonus = selectedMarch.speedBonus + nodeResource.speedBonus + globalSpeedBonus + imperialTitleBonus;
+        return node.baseSpeed * (1 + totalSpeedBonus);
+    }
+
+    function calculatePlan() {
+        const settings = getAppSettings();
+        if (!settings.selectedMarch || !settings.centerNodeData) return;
+
+        // 1. Determine Final Gather Node (the one with the largest single-trip capacity)
+        let finalGatherCandidates = [];
+        if (settings.centerNodeData.available) {
+            const effectiveSpeed = calculateEffectiveSpeed({ ...settings.centerNodeData, isCenter: true }, settings);
+            const potentialGather = effectiveSpeed * settings.timeAtCenterHours;
+            finalGatherCandidates.push({ ...settings.centerNodeData, effectiveCapacity: potentialGather, isCenter: true });
+        }
+        config.nodes.filter(n => n.available).forEach(node => {
+            finalGatherCandidates.push({ ...node, effectiveCapacity: node.capacity, isCenter: false });
+        });
+
+        finalGatherCandidates.sort((a, b) => b.effectiveCapacity - a.effectiveCapacity);
+        const finalGatherNodeData = finalGatherCandidates[0] || null;
+        
+        // 2. Calculate Final Gather Plan
+        let finalGatherPlan = { name: 'None', amount: 0, bonus: 0, time: 0 };
+        let amountFromFinalNode = 0;
+        if (finalGatherNodeData) {
+            const effectiveSpeed = calculateEffectiveSpeed(finalGatherNodeData, settings);
+            amountFromFinalNode = Math.min(settings.finalMarchLoad, finalGatherNodeData.effectiveCapacity);
+            finalGatherPlan = {
+                name: finalGatherNodeData.name,
+                amount: amountFromFinalNode,
+                bonus: amountFromFinalNode * settings.selectedMarch.finalBonus,
+                time: amountFromFinalNode > 0 ? amountFromFinalNode / effectiveSpeed : 0
+            };
+        }
 
         // 3. Generate Pre-fill Plan
-        let potentialPrefillNodes = [...config.nodes];
-        if (centerNode.repeatable) {
-            potentialPrefillNodes.push(centerNode);
-        }
-
-        const availablePrefillNodes = potentialPrefillNodes
-            .filter(n => n.available)
-            .map(n => ({...n, effectiveCapacity: n.capacity }))
-            .sort((a, b) => b.baseSpeed - a.baseSpeed);
-        
+        let amountToPrefill = settings.finalMarchLoad - amountFromFinalNode;
         let prefillPlan = [];
         
-        while (tempAmountToPrefill > 0.1) {
-            let nodeFoundThisLoop = false;
-            for (const node of availablePrefillNodes) {
-                const capacity = node.repeatable ? node.capacity : node.effectiveCapacity;
-                if (capacity > 0.1) {
-                    const amountToTake = Math.min(tempAmountToPrefill, capacity);
-                    
-                    const isCenterTypeNode = config.centerNodes.some(cn => cn.name === node.name);
-                    const prefillNodeResource = isCenterTypeNode ? centerResource : optimalResource;
-                    
-                    const totalDynamicPrefillSpeedBonus = selectedMarch.speedBonus + prefillNodeResource.speedBonus + globalSpeedBonus + imperialTitleBonus;
+        let prefillPool = config.nodes.filter(node => node.available).map(node => ({
+            ...node,
+            effectiveSpeed: calculateEffectiveSpeed(node, settings),
+            effectiveCapacity: node.capacity
+        }));
 
-                    const effectiveSpeed = node.baseSpeed * (1 + totalDynamicPrefillSpeedBonus);
-                    const timeNeededHours = amountToTake / effectiveSpeed;
-                    const bonusFromStep = amountToTake * selectedMarch.finalBonus;
-
-                    prefillPlan.push({
-                        name: node.name,
-                        amount: amountToTake,
-                        bonus: bonusFromStep,
-                        time: timeNeededHours
-                    });
-                    
-                    tempAmountToPrefill -= amountToTake;
-
-                    if (!node.repeatable) {
-                        node.effectiveCapacity -= amountToTake;
-                    }
-                    nodeFoundThisLoop = true;
-                    break; 
-                }
-            }
-            if (!nodeFoundThisLoop) break;
+        if (settings.centerNodeData.available) {
+            const centerSpeed = calculateEffectiveSpeed({ ...settings.centerNodeData, isCenter: true }, settings);
+            const centerCapacity = centerSpeed * settings.timeAtCenterHours;
+            prefillPool.push({ ...settings.centerNodeData, isCenter: true, effectiveSpeed: centerSpeed, effectiveCapacity: centerCapacity });
+        }
+        
+        // Exclude the final gather node if it's not repeatable
+        if (finalGatherNodeData && !finalGatherNodeData.repeatable) {
+            prefillPool = prefillPool.filter(n => n.name !== finalGatherNodeData.name);
         }
 
-        // 4. Final results object
-        const bonusFromCenter = optimalAmountFromCenter * selectedMarch.finalBonus;
-        const totalPrefillGatheredLoad = prefillPlan.reduce((sum, step) => sum + step.amount, 0);
-        const totalPrefillBonusGained = prefillPlan.reduce((sum, step) => sum + step.bonus, 0);
-        const totalLoadFilled = totalPrefillGatheredLoad + totalPrefillBonusGained + optimalAmountFromCenter;
+        prefillPool.sort((a, b) => b.effectiveSpeed - a.effectiveSpeed);
         
-        const results = {
-            marchName: selectedMarch.name,
-            finalMarchLoad,
-            prefillPlan,
-            centerPlan: {
-                name: centerNode.name,
-                amount: optimalAmountFromCenter,
-                bonus: bonusFromCenter,
-                time: actualTimeToFillCenterHours
-            },
-            totalResources: totalLoadFilled + bonusFromCenter,
-            bonusResources: totalPrefillBonusGained + bonusFromCenter,
-            optimalResourceName: optimalResourceName
-        };
+        while (amountToPrefill > 0.01 && prefillPool.length > 0) {
+            let bestNode = prefillPool[0];
+            let capacity = bestNode.repeatable ? bestNode.capacity : bestNode.effectiveCapacity;
+            if (capacity <= 0.01) {
+                prefillPool.shift();
+                continue;
+            }
 
+            const amountToTake = Math.min(amountToPrefill, capacity);
+            prefillPlan.push({
+                name: bestNode.name,
+                amount: amountToTake,
+                bonus: amountToTake * settings.selectedMarch.finalBonus,
+                time: amountToTake / bestNode.effectiveSpeed
+            });
+            
+            amountToPrefill -= amountToTake;
+
+            if (!bestNode.repeatable) {
+                bestNode.effectiveCapacity -= amountToTake;
+                if (bestNode.effectiveCapacity <= 0.01) prefillPool.shift();
+            }
+        }
+
+        // 4. Finalize and Render Results
+        const prefillBonusTotal = prefillPlan.reduce((sum, step) => sum + step.bonus, 0);
+        const totalBonus = prefillBonusTotal + finalGatherPlan.bonus;
+        const totalTime = prefillPlan.reduce((sum, step) => sum + step.time, 0) + finalGatherPlan.time;
+
+        const results = {
+            marchName: settings.selectedMarch.name,
+            finalMarchLoad: settings.finalMarchLoad,
+            prefillPlan,
+            finalGatherPlan,
+            totalResources: settings.finalMarchLoad + totalBonus,
+            bonusResources: totalBonus,
+            optimalResourceName: settings.optimalResource.name,
+            totalTime
+        };
         renderResults(results);
     }
     
     // --- RENDER RESULTS ---
     function renderResults(results) {
-        UIElements.resultsContainer.innerHTML = '';
-
-        function formatNumber(num) {
-            return Math.round(num).toLocaleString();
-        }
-
-        function formatTime(hours) {
-            if (!isFinite(hours)) return '00:00:00';
-            const totalSeconds = hours * 3600;
-            const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
-            const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
-            const s = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
-            return `${h}:${m}:${s}`;
-        }
-
         let html = '<div class="space-y-6">';
 
-        // Prefill steps
-        if (results.prefillPlan.length > 0) {
-            results.prefillPlan.forEach((step, index) => {
-                html += `
-                    <div class="bg-gray-700/50 p-4 rounded-lg">
-                        <p class="text-cyan-400 font-semibold">Step ${index + 1}: Pre-fill</p>
-                        <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm">
-                            <div><strong>Node:</strong> <span class="text-gray-300">${step.name}</span></div>
-                            <div><strong>Gather Amount:</strong> <span class="text-gray-300">${formatNumber(step.amount)}</span></div>
-                            <div><strong>Bonus Gained:</strong> <span class="text-green-400 font-medium">+${formatNumber(step.bonus)}</span></div>
-                            <div><strong>Est. Time:</strong> <span class="text-gray-300">${formatTime(step.time)}</span></div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-        
-        // Center step
-        html += `
-            <div class="bg-gray-700/50 p-4 rounded-lg">
-                <p class="text-cyan-400 font-semibold">Step ${results.prefillPlan.length + 1}: Final Gather</p>
+        results.prefillPlan.forEach((step, index) => {
+            html += `<div class="bg-gray-700/50 p-4 rounded-lg">
+                <p class="text-cyan-400 font-semibold">Step ${index + 1}: Pre-fill</p>
                 <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm">
-                    <div><strong>Node:</strong> <span class="text-gray-300">${results.centerPlan.name}</span></div>
-                    <div><strong>Gather Amount:</strong> <span class="text-gray-300">${formatNumber(results.centerPlan.amount)}</span></div>
-                    <div><strong>Bonus Gained:</strong> <span class="text-green-400 font-medium">+${formatNumber(results.centerPlan.bonus)}</span></div>
-                    <div><strong>Time to Fill:</strong> <span class="text-gray-300">${formatTime(results.centerPlan.time)}</span></div>
-                </div>
-            </div>
-        `;
+                    <div><strong>Node:</strong> <span class="text-gray-300">${step.name}</span></div>
+                    <div><strong>Gather Amount:</strong> <span class="text-gray-300">${formatNumber(step.amount)}</span></div>
+                    <div><strong>Bonus Gained:</strong> <span class="text-green-400 font-medium">+${formatNumber(step.bonus)}</span></div>
+                    <div><strong>Est. Time:</strong> <span class="text-gray-300">${formatTime(step.time)}</span></div>
+                </div></div>`;
+        });
+        
+        if (results.finalGatherPlan.amount > 0) {
+            const finalStepNumber = results.prefillPlan.length + 1;
+            html += `<div class="bg-gray-700/50 p-4 rounded-lg">
+                <p class="text-cyan-400 font-semibold">Step ${finalStepNumber}: Final Gather</p>
+                <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-sm">
+                    <div><strong>Node:</strong> <span class="text-gray-300">${results.finalGatherPlan.name}</span></div>
+                    <div><strong>Gather Amount:</strong> <span class="text-gray-300">${formatNumber(results.finalGatherPlan.amount)}</span></div>
+                    <div><strong>Bonus Gained:</strong> <span class="text-green-400 font-medium">+${formatNumber(results.finalGatherPlan.bonus)}</span></div>
+                    <div><strong>Est. Time:</strong> <span class="text-gray-300">${formatTime(results.finalGatherPlan.time)}</span></div>
+                </div></div>`;
+        } else if (results.prefillPlan.length === 0) {
+            html += `<p class="text-center text-gray-400">No available nodes to create a plan.</p>`;
+        }
 
-        // Summary
         html += `
             <div class="border-t border-gray-700 pt-6 mt-6">
                 <h3 class="text-xl font-semibold text-white mb-4">Summary</h3>
                 <div class="space-y-2 text-base bg-gray-900/50 p-4 rounded-lg">
-                     <div class="flex justify-between">
-                        <span class="text-gray-400">Optimal Pre-fill Resource:</span>
-                        <span class="font-bold text-white">${results.optimalResourceName}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Total Resources Gathered (incl. bonus):</span>
-                        <span class="font-bold text-green-400">${formatNumber(results.totalResources)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Target March Load:</span>
-                        <span class="font-medium text-gray-300">${formatNumber(results.finalMarchLoad)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Total Bonus Resources Gained:</span>
-                        <span class="font-medium text-cyan-400">+ ${formatNumber(results.bonusResources)}</span>
-                    </div>
+                    <div class="flex justify-between"><span class="text-gray-400">Optimal Pre-fill Resource:</span><span class="font-bold text-white">${results.optimalResourceName}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">Total Resources Gathered (incl. bonus):</span><span class="font-bold text-green-400">${formatNumber(results.totalResources)}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">Target March Load:</span><span class="font-medium text-gray-300">${formatNumber(results.finalMarchLoad)}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">Total Bonus Resources Gained:</span><span class="font-medium text-cyan-400">+ ${formatNumber(results.bonusResources)}</span></div>
+                    <div class="flex justify-between border-t border-gray-700 mt-2 pt-2"><span class="text-gray-400">Estimated Total Time:</span><span class="font-bold text-white">${formatTime(results.totalTime)}</span></div>
                 </div>
                 <img src="https://raw.githubusercontent.com/Sombrero16/Gathering-planner/main/assets/pictures/image03.jpg" alt="Summary Banner" class="w-full h-auto mt-6 rounded-lg object-cover">
             </div>
-        `;
+        </div>`;
         
-        html += '</div>';
         UIElements.resultsContainer.innerHTML = html;
     }
 
@@ -647,3 +661,4 @@
 
 </body>
 </html>
+
