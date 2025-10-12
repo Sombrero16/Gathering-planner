@@ -285,7 +285,7 @@
             { id: 'rc_gold', name: 'Resource Center (Gold)', baseSpeed: 250000, capacity: 800000000, repeatable: false, available: true },
         ],
         nodes: [
-            { name: 'T7', baseSpeed: 210000, capacity: 5292000, available: true, repeatable: false },
+            { name: 'T7', baseSpeed: 210000, capacity: 5292000, available: true, repeatable: true },
             { name: 'T6 Rich', baseSpeed: 420000, capacity: 12600000, available: true, repeatable: false },
             { name: 'T6', baseSpeed: 210000, capacity: 3780000, available: true, repeatable: true },
             { name: 'T5', baseSpeed: 200000, capacity: 2160000, available: true, repeatable: true },
@@ -359,7 +359,7 @@
 
     function populateNodes() {
         UIElements.nodesTable.innerHTML = '';
-        const specialNodeNames = ['T6 Rich'];
+        const specialNodeNames = ['T7', 'T6 Rich'];
 
         specialNodeNames.forEach(nodeName => {
             const node = config.nodes.find(n => n.name === nodeName);
