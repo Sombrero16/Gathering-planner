@@ -421,7 +421,7 @@
         const finalGatherNodeData = finalGatherCandidates.length > 0 ? finalGatherCandidates[0] : null;
 
         // Calculate Final Gather Plan
-        let finalGatherPlan = { name: 'None', amount: 0, bonus: 0, time: 0 };
+        let finalGatherPlan = { name: 'None', amount: 0, bonus: 0, effectiveSpeed: 1 };
         let amountFromFinalNode = 0;
 
         if (finalGatherNodeData) {
@@ -433,7 +433,7 @@
                 name: finalGatherNodeData.name,
                 amount: amountFromFinalNode,
                 bonus: amountFromFinalNode * finalBonus,
-                time: amountFromFinalNode > 0 ? amountFromFinalNode / effectiveSpeed : 0
+                effectiveSpeed
             };
         }
 
@@ -485,7 +485,7 @@
                 name: bestNode.name,
                 amount: amountToTake,
                 bonus: amountToTake * finalBonus,
-                time: amountToTake / bestNode.effectiveSpeed
+                effectiveSpeed: bestNode.effectiveSpeed
             });
 
             amountToPrefill -= loadConsumed;
@@ -497,17 +497,15 @@
         }
 
         // Finalize results
-        const prefillBonusTotal = prefillPlan.reduce((sum, step) => sum + step.bonus, 0);
-        const totalBonus = prefillBonusTotal + finalGatherPlan.bonus;
-        const totalTime = prefillPlan.reduce((sum, step) => sum + step.time, 0) + finalGatherPlan.time;
+        const totalTime = prefillPlan.reduce((sum, step) => sum + step.amount / step.effectiveSpeed, 0)
+                        + (finalGatherPlan.amount > 0 ? finalGatherPlan.amount / finalGatherPlan.effectiveSpeed : 0);
 
         renderResults({
             marchName: selectedMarch.name,
             finalMarchLoad,
             prefillPlan,
             centerPlan: finalGatherPlan,
-            totalResources: finalMarchLoad + totalBonus,
-            bonusResources: totalBonus,
+            totalResources: finalMarchLoad + finalGatherPlan.bonus,
             optimalResourceName: optimalResource.name,
             totalTime
         });
@@ -523,7 +521,7 @@
                     <div><strong>Node:</strong> <span class="text-gray-300">${step.name}</span></div>
                     <div><strong>Gather Amount:</strong> <span class="text-gray-300">${formatNumber(step.amount)}</span></div>
                     <div><strong>Bonus Gained:</strong> <span class="text-green-400 font-medium">+${formatNumber(step.bonus)}</span></div>
-                    <div><strong>Est. Time:</strong> <span class="text-gray-300">${formatTime(step.time)}</span></div>
+                    <div><strong>Est. Time:</strong> <span class="text-gray-300">${formatTime(Math.round(step.amount) / step.effectiveSpeed)}</span></div>
                 </div></div>`;
         });
 
@@ -536,7 +534,7 @@
                         <div><strong>Node:</strong> <span class="text-gray-300">${results.centerPlan.name}</span></div>
                         <div><strong>Gather Amount:</strong> <span class="text-gray-300">${formatNumber(results.centerPlan.amount)}</span></div>
                         <div><strong>Bonus Gained:</strong> <span class="text-green-400 font-medium">+${formatNumber(results.centerPlan.bonus)}</span></div>
-                        <div><strong>Est. Time:</strong> <span class="text-gray-300">${formatTime(results.centerPlan.time)}</span></div>
+                        <div><strong>Est. Time:</strong> <span class="text-gray-300">${formatTime(Math.round(results.centerPlan.amount) / results.centerPlan.effectiveSpeed)}</span></div>
                     </div></div>`;
             }
         } else {
@@ -548,9 +546,8 @@
                 <h3 class="text-xl font-semibold text-white mb-4">Summary</h3>
                 <div class="space-y-2 text-base bg-gray-900/50 p-4 rounded-lg">
                     <div class="flex justify-between"><span class="text-gray-400">Optimal Pre-fill Resource:</span><span class="font-bold text-white">${results.optimalResourceName}</span></div>
-                    <div class="flex justify-between"><span class="text-gray-400">Total Resources Gathered (incl. bonus):</span><span class="font-bold text-green-400">${formatNumber(results.totalResources)}</span></div>
                     <div class="flex justify-between"><span class="text-gray-400">Target March Load:</span><span class="font-medium text-gray-300">${formatNumber(results.finalMarchLoad)}</span></div>
-                    <div class="flex justify-between"><span class="text-gray-400">Total Bonus Resources Gained:</span><span class="font-medium text-cyan-400">+ ${formatNumber(results.bonusResources)}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">Total Resources Gathered (incl. bonus):</span><span class="font-bold text-green-400">${formatNumber(results.totalResources)}</span></div>
                     <div class="flex justify-between border-t border-gray-700 mt-2 pt-2"><span class="text-gray-400">Estimated Total Time:</span><span class="font-bold text-white">${formatTime(results.totalTime)}</span></div>
                 </div>
                 <img src="https://raw.githubusercontent.com/Sombrero16/Gathering-planner/main/assets/pictures/image03.jpg" alt="Summary Banner" class="w-full h-auto mt-6 rounded-lg object-cover">
